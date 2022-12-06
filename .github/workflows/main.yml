@@ -16,17 +16,18 @@ jobs:
         uses: actions/checkout@v2
       - name: Build Docker image        
         env:          
-          IMAGE_TAG: ${{ github.sha }}        
-        run: docker build -t $(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .       
-      - name: Run container        
+          GITHUB_SHA: ${{ github.sha }}        
+        run: docker build -t $(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
+      - name: Delete old container
         env:          
-          IMAGE_TAG: ${{ github.sha }}        
-        script: |
-          docker rm $(echo $IMAGE_NAME)
-
-          docker run -d \
+          GITHUB_SHA: ${{ github.sha }}        
+        run: docker rm $(echo $IMAGE_NAME)    
+      - name: Start new container
+        env:          
+          GITHUB_SHA: ${{ github.sha }}        
+        run: docker run -d \
             --restart always \
             -e DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN  }} \
             --name $(echo $IMAGE_NAME) \
-            $(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) $(echo $COMMAND)
+            $(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
 
