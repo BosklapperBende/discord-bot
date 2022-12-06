@@ -5,6 +5,7 @@ import requests
 from discord.ext import commands
 from datetime import datetime
 import schoolcalendar
+from threading import Thread
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -189,6 +190,5 @@ help_command = commands.DefaultHelpCommand(
 )
 
 bot = BosklapperClient(command_prefix='!', intents=intents, help_command = help_command)
-
 
 bot.run(TOKEN)
