@@ -4,6 +4,7 @@ import discord
 import requests
 from discord.ext import commands, tasks
 from cogs.school import SchoolCommands
+from cogs.watisdekans import WatIsDeKans
 from datetime import datetime, time, timedelta
 import asyncio
 
@@ -99,6 +100,7 @@ class BosklapperClient(commands.Bot):
 
   async def setup(self):
     self.schoolcom = SchoolCommands(self)
+    await self.add_cog(WatIsDeKans(self))
     await self.add_cog(self.schoolcom)
       
   async def on_command_error(self, ctx, error):
@@ -120,7 +122,7 @@ class BosklapperClient(commands.Bot):
   async def before_reminders(self):
     now = datetime.utcnow()
     await self.wait_until_ready()
-    if datetime.today().weekday() != 0 | now.time() > time(8,0,0):  
+    if (datetime.today().weekday() != 0) | (now.time() > time(8,0,0)):  
       tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0))
       print(tomorrow)
       seconds = (tomorrow - now).total_seconds()  
@@ -162,10 +164,6 @@ class BosklapperClient(commands.Bot):
     async def setremch(ctx, arg):
       self.reminder_channel = int(arg)
       await ctx.send("Reminders worden nu gestuurd in kanaal: **{}**".format(self.get_channel(self.reminder_channel)))
-
-
-async def setup(bot):
-  await bot.add_cog(SchoolCommands(bot))
 
 
 intents = discord.Intents.all()
