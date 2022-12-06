@@ -1,0 +1,21 @@
+name: Continous Deployment
+
+on:
+  push:
+    branches:
+      - main
+      
+jobs:
+  deployment:
+    runs-on: self-hosted
+    steps:
+      - name: checkout main
+        uses: actions/checkout@v2
+      - name: Build Docker image        
+        env:          
+          IMAGE_TAG: ${{ github.sha }}        
+        run: docker build -t $IMAGE_TAG .       
+      - name: Run container        
+        env:          
+          IMAGE_TAG: ${{ github.sha }}        
+        run: docker run -e DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN  }} $IMAGE_TAG
