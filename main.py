@@ -7,6 +7,7 @@ from cogs.school import SchoolCommands
 from cogs.watisdekans import WatIsDeKans
 from datetime import datetime, time, timedelta
 import asyncio
+import random as rn
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -165,6 +166,13 @@ class BosklapperClient(commands.Bot):
       self.reminder_channel = int(arg)
       await ctx.send("Reminders worden nu gestuurd in kanaal: **{}**".format(self.get_channel(self.reminder_channel)))
 
+    @self.command(help="Kies een random persoon uit de server")
+    async def random(ctx):
+      members = [ member for member in ctx.guild.members if not member.bot]
+      random_member = rn.choice(members)
+      await ctx.send("Tromgeroffel...")
+      await asyncio.sleep(2)
+      await ctx.send("▶️ <@{}> ◀️".format(random_member.id))
 
 intents = discord.Intents.all()
 help_command = commands.DefaultHelpCommand(
