@@ -2,8 +2,10 @@ import os
 import re
 import discord
 import requests
-from discord.ext import commands
+from discord.ext import commands, tasks
 from cogs.school import SchoolCommands
+from datetime import datetime, time, timedelta
+import asyncio
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -38,6 +40,7 @@ class BosklapperClient(commands.Bot):
   def __init__(self, command_prefix, intents,help_command):
     commands.Bot.__init__(self, command_prefix=command_prefix, intents=intents, help_command=help_command)
     self.add_commands()
+    self.reminder_channel = None
 
   async def on_message(self, message):
     await self.process_commands(message)
@@ -88,14 +91,47 @@ class BosklapperClient(commands.Bot):
 
   async def on_ready(self):
     print('Logged in as:')
-    print(bot.user.name)
-    await setup(bot)
-    await bot.change_presence(activity=discord.Activity(
+    print(self.user.name)
+    await self.setup()
+    await self.change_presence(activity=discord.Activity(
       type=discord.ActivityType.watching, name="Het Eiland"))
+    self.reminders.start()
+
+  async def setup(self):
+    self.schoolcom = SchoolCommands(self)
+    await self.add_cog(self.schoolcom)
       
   async def on_command_error(self, ctx, error):
       if isinstance(error, commands.MissingRequiredArgument):
           await ctx.send("Ai, er ging iets mis!")
+
+  @tasks.loop(hours=7*24)
+  async def reminders(self):
+    try:
+      now = datetime.utcnow()
+      await self.schoolcom.send_upcoming_dl(bot.get_channel(self.reminder_channel))
+      tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0))
+      seconds = (tomorrow - now).total_seconds()  
+      await asyncio.sleep(seconds) 
+    except NameError:
+      print("Geen gevonden")
+
+  @reminders.before_loop  # it's called before the actual task runs
+  async def before_reminders(self):
+    now = datetime.utcnow()
+    await self.wait_until_ready()
+    if datetime.today().weekday() != 0 | now.time() > time(8,0,0):  
+      tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0))
+      print(tomorrow)
+      seconds = (tomorrow - now).total_seconds()  
+      await asyncio.sleep(seconds)  
+    while True:
+      now = datetime.utcnow() 
+      target_time = datetime.combine(now.date(), time(8,0,0)) 
+      seconds_until_target = (target_time - now).total_seconds()
+      await asyncio.sleep(seconds_until_target) 
+      return 
+
 
   def add_commands(self):
     @self.command(help="Ja, wa peisde nou zelf?")
@@ -122,6 +158,10 @@ class BosklapperClient(commands.Bot):
         args_n.append(arg[::-1])
       await ctx.send(' '.join(args_n))
 
+    @self.command(help="Wijzig het kanaal voor de reminders")
+    async def setremch(ctx, arg):
+      self.reminder_channel = int(arg)
+
 
 async def setup(bot):
   await bot.add_cog(SchoolCommands(bot))
@@ -131,7 +171,6 @@ intents = discord.Intents.all()
 help_command = commands.DefaultHelpCommand(
     no_category = 'Commands'
 )
-
 bot = BosklapperClient(command_prefix='!', intents=intents, help_command = help_command)
 
 bot.run(TOKEN)

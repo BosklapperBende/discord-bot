@@ -38,8 +38,15 @@ class SchoolCalendar:
         self.deadlines[vak].pop(dl_title)
         self.save()
 
+    def get_all_dl(self):
+        days = {}
+        for vak in self.deadlines.keys():
+            dl_vak = self.get_deadlines(vak)
+            for title, day in dl_vak.items():
+                days[day] = (vak, title)
+        return days
+
     def save(self):
         print(self.deadlines)
         with open('cal.pkl', 'wb') as outp:
             pickle.dump(self.deadlines, outp, pickle.HIGHEST_PROTOCOL)
-

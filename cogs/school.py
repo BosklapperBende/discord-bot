@@ -1,5 +1,6 @@
 import schoolcalendar
 from discord.ext import commands
+from datetime import datetime, time, timedelta
 
 class SchoolCommands(commands.Cog, name="School"):
   def __init__(self, bot):
@@ -7,6 +8,19 @@ class SchoolCommands(commands.Cog, name="School"):
     self.cal = schoolcalendar.SchoolCalendar()
     self.cal.open()
     self.bot = bot
+
+  async def send_upcoming_dl(self, channel):
+    if channel != None:
+      res = "===================================\n"
+      res += "\t\t\t**Deadlines komende 2 weken**\t\n"
+      res += "==================================="
+      for day, vak_title_tuple in self.cal.get_all_dl().items():
+        if(day <= datetime.now()+timedelta(days=14)):
+          res += '\n{}\t[{}]\t{}'.format(day.strftime("%d/%m/%Y %H:%M"), vak_title_tuple[0], vak_title_tuple[1])
+      await channel.send(res)
+
+    else:
+      raise NameError
 
 
   @commands.command(help="Voeg nieuw vak toe")
