@@ -16,13 +16,13 @@ class SchoolCommands(commands.Cog, name="School"):
 
   @commands.command(help="Wijzig of voeg een deadline toe van een vak")
   async def setdl(self, ctx, vak: str = commands.parameter(description="Naam vak"), titel: str = commands.parameter(description="Titel van de deadline"), datum: str = commands.parameter(description="Datum van de deadline in de vorm DD/MM/YYYY"), hour: str = commands.parameter(description="Uur van de deadline in de vorm HH:MM")):
-    self.cal.set_deadline(vak, ' '.join(datum, hour), titel)
-    await ctx.send("Deadline voor **{}**: _{}_\n\t{}".format(vak, titel, ' '.join(datum, hour)))
+    self.cal.set_deadline(vak, '{} {}'.format(datum, hour), titel)
+    await ctx.send("Deadline voor **{}**: _{}_\n\t{}".format(vak, titel, '{} {}'.format(datum, hour)))
 
   @commands.command(help="Wijzig of voeg een datum toe voor het examen van een vak")
   async def setex(self, ctx, vak: str = commands.parameter(description="Naam vak"), datum: str = commands.parameter(description="Datum van het examen in de vorm DD/MM/YYYY"), hour: str = commands.parameter(description="Uur van het examen in de vorm HH:MM")):
-    self.cal.set_exam_date(vak, ' '.join(datum, hour))
-    await ctx.send("Examen voor **{}**\n\t{}".format(vak, ' '.join(datum, hour)))
+    self.cal.set_exam_date(vak, '{} {}'.format(datum, hour))
+    await ctx.send("Examen voor **{}**\n\t{}".format(vak, '{} {}'.format(datum, hour)))
     
   @commands.command(help="Bekijk alle deadlines van een vak")
   async def dl(self, ctx, vak: str = commands.parameter(description="Naam vak")):
