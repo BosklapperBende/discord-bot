@@ -109,7 +109,7 @@ class BosklapperClient(commands.Bot):
   async def reminders(self):
     try:
       now = datetime.utcnow()
-      await self.schoolcom.send_upcoming_dl(bot.get_channel(self.reminder_channel))
+      await self.schoolcom.send_upcoming_dl(self.get_channel(self.reminder_channel))
       tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0))
       seconds = (tomorrow - now).total_seconds()  
       await asyncio.sleep(seconds) 
@@ -161,6 +161,7 @@ class BosklapperClient(commands.Bot):
     @self.command(help="Wijzig het kanaal voor de reminders")
     async def setremch(ctx, arg):
       self.reminder_channel = int(arg)
+      await ctx.send("Reminders worden nu gestuurd in kanaal: **{}**".format(self.get_channel(self.reminder_channel)))
 
 
 async def setup(bot):
