@@ -1,5 +1,8 @@
 name: Continous Deployment
 
+env:
+  IMAGE_NAME: "discord_bosklapper_bot"
+
 on:
   push:
     branches:
@@ -9,13 +12,21 @@ jobs:
   deployment:
     runs-on: self-hosted
     steps:
-      - name: checkout main
+      - name: Checkout Main branch
         uses: actions/checkout@v2
       - name: Build Docker image        
         env:          
           IMAGE_TAG: ${{ github.sha }}        
-        run: docker build -t $IMAGE_TAG .       
+        run: docker build -t $(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .       
       - name: Run container        
         env:          
           IMAGE_TAG: ${{ github.sha }}        
-        run: docker run -e DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN  }} $IMAGE_TAG
+        script: |
+          docker rm $(echo $IMAGE_NAME)
+
+          docker run -d \
+            --restart always \
+            -e DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN  }} \
+            --name $(echo $IMAGE_NAME) \
+            $(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) $(echo $COMMAND)
+
