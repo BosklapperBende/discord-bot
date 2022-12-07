@@ -6,7 +6,7 @@ class SchoolCalendar:
     deadlines = {}
 
     def open(self):
-        with open('cal.pkl', 'rb') as inp:
+        with open('saved/cal.pkl', 'rb') as inp:
             self.deadlines = pickle.load(inp)
         print(self.deadlines)
 
@@ -49,5 +49,5 @@ class SchoolCalendar:
 
     def save(self):
         print(self.deadlines)
-        with open('cal.pkl', 'wb') as outp:
+        with open('saved/cal.pkl', 'wb') as outp:
             pickle.dump(self.deadlines, outp, pickle.HIGHEST_PROTOCOL)

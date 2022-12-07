@@ -7,7 +7,7 @@ class SchoolCommands(commands.Cog, name="School"):
   def __init__(self, bot):
     print("School aangemaakt!")
     self.cal = schoolcalendar.SchoolCalendar()
-    if(os.path.exists("cal.pkl")):
+    if(os.path.exists("saved/cal.pkl")):
       self.cal.open()
     self.bot = bot
 
