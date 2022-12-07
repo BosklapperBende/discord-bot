@@ -1,41 +1,16 @@
 import os
-import re
 import discord
-import requests
 from discord.ext import commands, tasks
-from cogs.school import SchoolCommands
-from cogs.watisdekans import WatIsDeKans
+import cogs
 from datetime import datetime, time, timedelta
 import asyncio
 import random as rn
+import helpers
 
 from dotenv import load_dotenv
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
-
-
-def get_live_scores():
-  rows = []
-  url = "https://prod-public-api.livescore.com/v1/api/react/live/soccer/0.00?MD=1"
-  jsonData = requests.get(url).json()
-  for stage in jsonData['Stages']:
-    if "CompId" in stage.keys():
-      if stage["CompId"] in ["54", "73", "65"]:
-        rows.append(stage["CompN"] + ":")
-        events = stage['Events']
-        for event in events:
-          homeTeam = event['T1'][0]['Nm']
-          homeScore = event['Tr1']
-
-          awayTeam = event['T2'][0]['Nm']
-          awayScore = event['Tr2']
-
-          matchClock = event['Eps']
-
-          string = "\n>\t{} - {} ({}')\t[{} - {}]".format(
-            homeTeam, awayTeam, matchClock, homeScore, awayScore)
-          rows.append(string)
-  return rows
+DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
 class BosklapperClient(commands.Bot):
 
@@ -43,53 +18,14 @@ class BosklapperClient(commands.Bot):
     commands.Bot.__init__(self, command_prefix=command_prefix, intents=intents, help_command=help_command)
     self.add_commands()
     self.reminder_channel = None
+    self.joke_channel = None
 
   async def on_message(self, message):
     await self.process_commands(message)
     if message.author == bot.user:
       return
-
-    content = message.content.lower()
-
-    if content != None:
-      if "here we go" in content:
-        await message.channel.send("🎵  ON THIS ROLLERCOAST LIFE WE GO! 🎶 ")
-
-      elif "zucht" in content:
-        await message.channel.send("Stop met zuchten >:(")
-
-      elif "bier" in content:
-        await message.add_reaction("🍻")
-
-      elif "blok" in content:
-        await message.add_reaction("◻️")
-
-      elif "afspreken" in content or re.match(r"[a-z ]*spreken[a-z ]*af",
-                                              content):
-        with open('img/afspreken_guido.png', 'rb') as f:
-          picture = discord.File(f)
-          await message.reply(file=picture)
-      
-      elif "koffie" in content:
-        await message.channel.send("Ja lap! We zitten met ne ring! Op ne Dusseldorf! ** GELE KAART! **")
-
-      elif "zever" in content:
-        await message.reply("GEZEVER!")
-
-      elif "porn" in content:
-        with open('img/porno-guido.jpg', 'rb') as f:
-          picture = discord.File(f)
-          await message.reply("Zijde gij ne pornomens, " + message.author.display_name + '?', file=picture)
-      
-      elif "satan" in content:
-        with open('img/sammy-tanghe.jpg', 'rb') as f:
-          picture = discord.File(f)
-          await message.reply(file=picture)
-
-      elif "team" in content:
-        with open('img/blij-team.jpg', 'rb') as f:
-          picture = discord.File(f)
-          await message.reply(file=picture)
+    
+    await helpers.react_to_message(message)
 
   async def on_ready(self):
     print('Logged in as:')
@@ -98,10 +34,12 @@ class BosklapperClient(commands.Bot):
     await self.change_presence(activity=discord.Activity(
       type=discord.ActivityType.watching, name="Het Eiland"))
     self.reminders.start()
+    self.joke.start()
 
   async def setup(self):
-    self.schoolcom = SchoolCommands(self)
-    await self.add_cog(WatIsDeKans(self))
+    self.schoolcom = cogs.SchoolCommands(self)
+    await self.add_cog(cogs.WatIsDeKans(self))
+    await self.add_cog(cogs.Github(self, GITHUB_TOKEN))
     await self.add_cog(self.schoolcom)
       
   async def on_command_error(self, ctx, error):
@@ -121,25 +59,32 @@ class BosklapperClient(commands.Bot):
 
   @reminders.before_loop  # it's called before the actual task runs
   async def before_reminders(self):
-    now = datetime.utcnow()
     await self.wait_until_ready()
-    if (datetime.today().weekday() != 0) | (now.time() > time(8,0,0)):  
-      tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0))
-      print(tomorrow)
-      seconds = (tomorrow - now).total_seconds()  
-      await asyncio.sleep(seconds)  
-    while True:
-      now = datetime.utcnow() 
-      target_time = datetime.combine(now.date(), time(8,0,0)) 
-      seconds_until_target = (target_time - now).total_seconds()
-      await asyncio.sleep(seconds_until_target) 
-      return 
+    await helpers.wait_until_time(8, True)
 
+  @tasks.loop(seconds=10)
+  async def joke(self):
+    if self.joke_channel == None:
+      return
+    try:
+      now = datetime.utcnow()
+      cat, joke = helpers.get_joke()
+      await self.get_channel(self.joke_channel).send("**Mop van de dag: *** Het is een _{}_\n```{}```".format(cat, joke))
+      tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0))
+      seconds = (tomorrow - now).total_seconds()  
+      await asyncio.sleep(seconds) 
+    except NameError:
+      print("Geen gevonden")
+
+  @joke.before_loop
+  async def before_joke(self):
+    await self.wait_until_ready()
+    await helpers.wait_until_time(12)
 
   def add_commands(self):
     @self.command(help="Ja, wa peisde nou zelf?")
     async def livescore(ctx, *args):
-      live_score = get_live_scores()
+      live_score = helpers.get_live_scores()
       if len(live_score) == 0:
         await ctx.send(
           "Ai, jammer. Er worden momenteel geen wedstrijden gespeeld.")
@@ -166,6 +111,11 @@ class BosklapperClient(commands.Bot):
       self.reminder_channel = int(arg)
       await ctx.send("Reminders worden nu gestuurd in kanaal: **{}**".format(self.get_channel(self.reminder_channel)))
 
+    @self.command(help="Wijzig het kanaal voor de moppen")
+    async def setjokech(ctx, arg):
+      self.joke_channel = int(arg)
+      await ctx.send("De dagelijkse mop wordt nu gestuurd in kanaal: **{}**".format(self.get_channel(self.joke_channel)))
+
     @self.command(help="Kies een random persoon uit de server")
     async def random(ctx):
       members = [ member for member in ctx.guild.members if not member.bot]
@@ -180,4 +130,4 @@ help_command = commands.DefaultHelpCommand(
 )
 bot = BosklapperClient(command_prefix='!', intents=intents, help_command = help_command)
 
-bot.run(TOKEN)
+bot.run(DISCORD_TOKEN)
