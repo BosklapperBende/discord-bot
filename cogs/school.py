@@ -1,12 +1,14 @@
 import schoolcalendar
 from discord.ext import commands
 from datetime import datetime, time, timedelta
+import os
 
 class SchoolCommands(commands.Cog, name="School"):
   def __init__(self, bot):
     print("School aangemaakt!")
     self.cal = schoolcalendar.SchoolCalendar()
-    self.cal.open()
+    if(os.path.exists("cal.pkl")):
+      self.cal.open()
     self.bot = bot
 
   async def send_upcoming_dl(self, channel):

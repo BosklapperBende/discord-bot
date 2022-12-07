@@ -8,6 +8,7 @@ class SchoolCalendar:
     def open(self):
         with open('cal.pkl', 'rb') as inp:
             self.deadlines = pickle.load(inp)
+        print(self.deadlines)
 
     def add_vak(self, vak):
         self.deadlines[vak] = {}
