@@ -10,7 +10,7 @@ class SchoolCommands(commands.Cog, name="School"):
     def __init__(self, bot):
         _log.info("Commands created")
         self.cal = schoolcalendar.SchoolCalendar()
-        if(os.path.exists("saved/cal.pkl")):
+        if(os.path.exists("/saved/cal.pkl")):
             _log.info("Got backup of calendar...")
             self.cal.open()
         self.bot = bot

@@ -3,5 +3,5 @@ WORKDIR /bot
 COPY requirements.txt /bot/
 RUN pip install -r requirements.txt
 COPY . /bot
-RUN mkdir saved
+RUN mkdir -p /saved
 CMD python main.py
