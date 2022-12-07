@@ -67,6 +67,6 @@ class SchoolCalendar:
         return days
 
     def save(self):
-        with open('saved/cal.pkl', 'wb') as outp:
+        with open('/saved/cal.pkl', 'wb') as outp:
             pickle.dump(self.deadlines, outp, pickle.HIGHEST_PROTOCOL)
             _log.info("Saved calendar")
