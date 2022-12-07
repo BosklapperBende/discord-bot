@@ -1,6 +1,9 @@
 from collections import OrderedDict
 from datetime import datetime
 import pickle
+import logging
+
+_log = logging.getLogger(__name__)
 
 class SchoolCalendar:
     deadlines = {}
@@ -8,7 +11,7 @@ class SchoolCalendar:
     def open(self):
         with open('saved/cal.pkl', 'rb') as inp:
             self.deadlines = pickle.load(inp)
-        print(self.deadlines)
+        _log.info("Restored backup of calendar!")
 
     def add_vak(self, vak):
         self.deadlines[vak] = {}
@@ -48,6 +51,5 @@ class SchoolCalendar:
         return days
 
     def save(self):
-        print(self.deadlines)
         with open('saved/cal.pkl', 'wb') as outp:
             pickle.dump(self.deadlines, outp, pickle.HIGHEST_PROTOCOL)

@@ -1,10 +1,13 @@
 from collections import OrderedDict
+import logging
 from discord.ext import commands
 import helpers
 
+_log = logging.getLogger(__name__)
+
 class Github(commands.Cog, name="Github"):
     def __init__(self, bot, token):
-        print("Github aangemaakt!")
+        _log.info("Commands created")
         self.bot = bot
         self.token = token
  

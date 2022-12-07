@@ -1,3 +1,4 @@
+import logging
 import os
 import discord
 from discord.ext import commands, tasks
@@ -6,8 +7,12 @@ from datetime import datetime, time, timedelta
 import asyncio
 import random as rn
 import helpers
-
 from dotenv import load_dotenv
+
+helpers.setup_logger()
+
+_log = logging.getLogger(__name__)
+
 load_dotenv()
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 GITHUB_TOKEN = os.getenv("GH_TOKEN")
@@ -28,8 +33,7 @@ class BosklapperClient(commands.Bot):
     await helpers.react_to_message(message)
 
   async def on_ready(self):
-    print('Logged in as:')
-    print(self.user.name)
+    _log.info("Started Bosklapper Bot...")
     await self.setup()
     await self.change_presence(activity=discord.Activity(
       type=discord.ActivityType.watching, name="Het Eiland"))
@@ -128,6 +132,8 @@ intents = discord.Intents.all()
 help_command = commands.DefaultHelpCommand(
     no_category = 'Commands'
 )
+
 bot = BosklapperClient(command_prefix='!', intents=intents, help_command = help_command)
 
-bot.run(DISCORD_TOKEN)
+
+bot.run(DISCORD_TOKEN, log_handler=None)

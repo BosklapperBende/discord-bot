@@ -1,9 +1,12 @@
+import logging
 from discord.ext import commands
 import discord
 
+_log = logging.getLogger(__name__)
+
 class WatIsDeKans(commands.Cog, name="WatIsDeKans"):
     def __init__(self, bot):
-        print("WatIsDeKans aangemaakt!")
+        _log.info("Commands created")
         self.bot = bot
         self.reset_players()
 
