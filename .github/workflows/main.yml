@@ -29,11 +29,11 @@ jobs:
       - name: Start new container
         env:          
           GITHUB_SHA: ${{ github.sha }}        
-        run: docker run -d --restart always -e DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN  }} -v calendar:/ --name $(echo $IMAGE_NAME) $(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
+        run: docker run -d --restart always -e DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN  }} -v calendar:/root --name $(echo $IMAGE_NAME) $(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7)
       - name: Remove old images
         env:          
           GITHUB_SHA: ${{ github.sha }}        
-        run: docker image prune -f
+        run: docker image prune -f -a
       - name: Prune system
         run: docker system prune
 
