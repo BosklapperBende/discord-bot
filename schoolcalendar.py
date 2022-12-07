@@ -2,6 +2,7 @@ from collections import OrderedDict
 from datetime import datetime
 import pickle
 import logging
+import os
 
 _log = logging.getLogger(__name__)
 
@@ -9,9 +10,24 @@ class SchoolCalendar:
     deadlines = {}
 
     def open(self):
-        with open('saved/cal.pkl', 'rb') as inp:
-            self.deadlines = pickle.load(inp)
-        _log.info("Restored backup of calendar!")
+        try:
+            if(not os.path.exists("/saved/cal.pkl")):
+                file = open('/saved/cal.pkl','wb+')
+                _log.info("Creating new file for calendar")
+                pickle.dump(self.deadlines,file)
+                file.close()
+            else:
+                _log.info("Restoring backup for calendar.")
+
+                
+        except Exception as e:
+            _log.error("{} - {}".format(type(e), e))
+
+        
+        with open('/saved/cal.pkl','rb') as input:
+            self.deadlines = pickle.load(input)
+
+        input.close()
 
     def add_vak(self, vak):
         self.deadlines[vak] = {}

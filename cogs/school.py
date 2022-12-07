@@ -2,7 +2,6 @@ import schoolcalendar
 import logging
 from discord.ext import commands
 from datetime import datetime, time, timedelta
-import os
 
 _log = logging.getLogger(__name__)
 
@@ -10,9 +9,7 @@ class SchoolCommands(commands.Cog, name="School"):
     def __init__(self, bot):
         _log.info("Commands created")
         self.cal = schoolcalendar.SchoolCalendar()
-        if(os.path.exists("/saved/cal.pkl")):
-            _log.info("Got backup of calendar...")
-            self.cal.open()
+        self.cal.open()
         self.bot = bot
 
     async def send_upcoming_dl(self, channel):
