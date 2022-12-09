@@ -38,7 +38,7 @@ def get_live_scores():
 
 async def wait_until_time(uur: int, wait_on_monday: bool = False):
     now = datetime.utcnow()
-    if ((wait_on_monday) & (datetime.today().weekday() != 0)) | (now.time() > time(8,0,0)):  
+    if ((wait_on_monday) & (datetime.today().weekday() != 0)) | (now.time() > time(uur,0,0)):  
       tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0))
       seconds = (tomorrow - now).total_seconds()  
       await asyncio.sleep(seconds)  

@@ -66,7 +66,7 @@ class BosklapperClient(commands.Bot):
     await self.wait_until_ready()
     await helpers.wait_until_time(8, True)
 
-  @tasks.loop(seconds=10)
+  @tasks.loop(hours=24)
   async def joke(self):
     if self.joke_channel == None:
       return
