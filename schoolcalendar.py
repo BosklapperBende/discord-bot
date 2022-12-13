@@ -28,6 +28,7 @@ class SchoolCalendar:
             self.deadlines = pickle.load(input)
 
         input.close()
+        _log.info(self.deadlines)
 
     def add_vak(self, vak):
         self.deadlines[vak] = {}
@@ -71,12 +72,13 @@ class SchoolCalendar:
 
     def remove_old_dl(self):
         for vak in self.deadlines.keys():
-            dl_vak = self.get_deadlines(vak)
+            dl_vak = OrderedDict(sorted(self.deadlines[vak].items(), key = lambda x:x[1]))
             for title, day in dl_vak.items():
                 _log.info(day)
                 if day < datetime.now():
                     print(vak, " ", title, " removing")
                     del self.deadlines[vak][title]
+            
 
     def save(self):
         self.remove_old_dl()
