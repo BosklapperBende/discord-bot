@@ -64,7 +64,7 @@ class BosklapperClient(commands.Bot):
   @reminders.before_loop  # it's called before the actual task runs
   async def before_reminders(self):
     await self.wait_until_ready()
-    await helpers.wait_until_time(8, True)
+    await helpers.wait_until_time(9, True)
 
   @tasks.loop(hours=24)
   async def joke(self):
@@ -73,7 +73,7 @@ class BosklapperClient(commands.Bot):
     try:
       now = datetime.utcnow()
       cat, joke = helpers.get_joke()
-      await self.get_channel(self.joke_channel).send("**Mop van de dag: *** Het is een _{}_\n```{}```".format(cat, joke))
+      await self.get_channel(self.joke_channel).send("**Mop van de dag: ** Het is een _{}_\n```{}```".format(cat, joke))
       tomorrow = datetime.combine(now.date() + timedelta(days=1), time(0))
       seconds = (tomorrow - now).total_seconds()  
       await asyncio.sleep(seconds) 
@@ -83,7 +83,7 @@ class BosklapperClient(commands.Bot):
   @joke.before_loop
   async def before_joke(self):
     await self.wait_until_ready()
-    await helpers.wait_until_time(12)
+    await helpers.wait_until_time(11)
 
   def add_commands(self):
     @self.command(help="Ja, wa peisde nou zelf?")
