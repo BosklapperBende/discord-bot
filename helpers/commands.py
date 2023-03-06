@@ -1,7 +1,8 @@
 import discord
+from discord.ext.commands import Bot
 import re
 
-async def react_to_message(message: discord.Message):
+async def react_to_message(bot: Bot, message: discord.Message):
     content = message.content.lower()
 
     if content == None:
@@ -45,3 +46,17 @@ async def react_to_message(message: discord.Message):
         with open('img/blij-team.jpg', 'rb') as f:
             picture = discord.File(f)
             await message.reply(file=picture)
+
+    elif "piemol" in content:
+        emojis_names = [ "pimol0", "pimol1", "pimol2", "pimol3", "pimol4", "pimol5" ]
+        for nm in emojis_names:
+            emoji = discord.utils.get(bot.emojis, name=nm)
+            if emoji != None:
+                await message.add_reaction(emoji)
+
+    elif "gele kaart" in content:
+        msg = [msg async for msg in message.channel.history(limit=2)][1]
+        await msg.add_reaction(discord.utils.get(bot.emojis, name="gelekaart"))
+
+    elif "brb" in content:
+        await message.reply("test")
