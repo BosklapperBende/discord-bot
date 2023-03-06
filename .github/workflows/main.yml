@@ -21,11 +21,11 @@ jobs:
       - name: Stop container
         env:          
           GITHUB_SHA: ${{ github.sha }}        
-        run: docker stop $(echo $IMAGE_NAME)  
+        run: docker stop $(echo $IMAGE_NAME) || true
       - name: Delete old container
         env:          
           GITHUB_SHA: ${{ github.sha }}        
-        run: docker rm $(echo $IMAGE_NAME)  
+        run: docker rm $(echo $IMAGE_NAME) || true
       - name: Start new container
         env:          
           GITHUB_SHA: ${{ github.sha }}        
